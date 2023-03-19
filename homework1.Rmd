@@ -1,0 +1,136 @@
+---
+title: "Homework 1"
+author: "Costa Stavrianidis"
+date: "2022-09-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(patchwork)
+library(gridExtra)
+library(psych)
+library(corrplot)
+```
+
+# Shell Scripting
+Question 1
+```{bash, eval=FALSE}
+sftp> put heart-disease.csv.gz .
+Uploading heart-disease.csv.gz to /hpc/home/cs621/./heart-disease.csv.gz
+heart-disease.csv.gz                                 100% 4314   111.2KB/s   00:00   
+```
+
+Question 2
+```{bash, eval=FALSE}
+(base) cs621@dcc-login-01  ~ $ zcat heart-disease.csv.gz | head -5
+"age" "sex" "cp" "trestbps" "chol" "fbs" "restecg" "thalach" "exang" "oldpeak" "slope" "ca" "thal" "num" "diagnosed"
+"1" 67 1 4 160 286 0 2 108 1 1.5 2 "3.0" "3.0" 2 TRUE
+"2" 67 1 4 120 229 0 2 129 1 2.6 2 "2.0" "7.0" 1 TRUE
+"3" 37 1 3 130 250 0 0 187 0 3.5 3 "0.0" "3.0" 0 FALSE
+"4" 41 0 2 130 204 0 2 172 0 1.4 1 "0.0" "3.0" 0 FALSE
+
+(base) cs621@dcc-login-01  ~ $ zcat heart-disease.csv.gz | tail -5
+"298" 45 1 1 110 264 0 0 132 0 1.2 2 "0.0" "7.0" 1 TRUE
+"299" 68 1 4 144 193 1 0 141 0 3.4 2 "2.0" "7.0" 2 TRUE
+"300" 57 1 4 130 131 0 0 115 1 1.2 2 "1.0" "7.0" 3 TRUE
+"301" 57 0 2 130 236 0 2 174 0 0 2 "1.0" "3.0" 1 TRUE
+"302" 38 1 3 138 175 0 0 173 0 0 1 "?" "3.0" 0 FALSE
+```
+
+Question 3
+```{bash, eval=FALSE}
+(base) cs621@dcc-login-01  ~ $ zcat heart-disease.csv.gz | wc -l
+303
+```
+
+Question 4
+```{bash, eval=FALSE}
+(base) cs621@dcc-login-01  ~ $ gunzip -k heart-disease.csv.gz 
+(base) cs621@dcc-login-01  ~ $ ls
+heart-disease.csv  heart-disease.csv.gz  R  testdirectory
+```
+
+Question 5
+```{bash, eval=FALSE}
+(base) cs621@dcc-login-01  ~ $ grep -c "TRUE" heart-disease.csv
+139
+```
+
+Question 6
+```{bash, eval=FALSE}
+# Columns
+(base) cs621@dcc-login-01  ~ $ awk '{print NF; exit}' heart-disease.csv
+15
+
+# Rows
+(base) cs621@dcc-login-01  ~ $ wc -l heart-disease.csv
+303 heart-disease.csv
+
+# Row count is the same as in question 3.
+```
+
+# Complete a Tutorial for "dplyr"
+Question 8
+```{r}
+starwars %>% 
+  filter(species == "Droid")
+
+starwars %>% 
+  select(name, ends_with("color"))
+
+starwars %>% 
+  mutate(name, bmi = mass / ((height / 100)  ^ 2)) %>%
+  select(name:mass, bmi)
+
+starwars %>% 
+  arrange(desc(mass))
+
+starwars %>%
+  group_by(species) %>%
+  summarise(
+    n = n(),
+    mass = mean(mass, na.rm = TRUE)
+  ) %>%
+  filter(
+    n > 1,
+    mass > 50
+  )
+```
+
+# Dataset Summary and Plotting
+Question 9
+```{r}
+heart <- read_csv("heart_failure.csv", show_col_types = FALSE)
+```
+
+Question 10
+```{r}
+summary(heart)
+nrow(heart)
+# There are 299 rows in this dataset.
+```
+
+Question 11
+```{r}
+heart %>% count(anaemia)
+# There are 129 people with anaemia.
+```
+
+Question 12
+```{r}
+heart %>% filter(smoking == 1) %>% count(DEATH_EVENT)
+# There were 30 death events in people who smoked.
+```
+
+Question 13
+```{r}
+heart_death <- heart %>% filter(DEATH_EVENT == 1) %>% mutate(diabetes1 = ifelse(diabetes == 0, "No Diabetes", "Diabetes"))
+
+ggplot(heart_death, aes(x=diabetes1, fill=diabetes1)) + geom_bar() +
+  ggtitle("Number of Deaths by Diabetes Group") + xlab("Diabetes Group") +
+  ylab("Number of Deaths") + labs(fill="Diabetes Status")
+```
+
